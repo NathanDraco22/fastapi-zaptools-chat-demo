@@ -17,10 +17,6 @@ app.add_middleware(
 reg: EventRegister= EventRegister()
 room: Room = Room("chats")
 
-@reg.on_event("connected")
-async def on_connected(ctx: EventContext):
-    print("client connected")
-
 @reg.on_event("join-room")
 async def on_join_to_room(ctx: EventContext):
     room.add(ctx.connection)
@@ -30,20 +26,14 @@ async def on_join_to_room(ctx: EventContext):
 async def on_disconnected(ctx: EventContext):
     room.remove(ctx.connection)
     room.send("user-left", {}, exclude= ctx.connection)
-    print("client disconnected")
 
 @reg.on_event("confirm")
 async def on_confirm(ctx: EventContext):
     room.send("new", "new-connected", exclude= ctx.connection)
-    print(ctx.payload)
 
 @reg.on_event("send")
 async def on_send(ctx: EventContext):
-    print(ctx.payload)
     room.send("new-message", ctx.payload, exclude=ctx.connection)
-    print(ctx.payload)
-
-
 
 @app.websocket("/ws")
 async def websocket_controller(ws: WebSocket ):
