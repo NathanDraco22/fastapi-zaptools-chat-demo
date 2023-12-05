@@ -20,20 +20,20 @@ room: Room = Room("chats")
 @reg.on_event("join-room")
 async def on_join_to_room(ctx: EventContext):
     room.add(ctx.connection)
-    room.send("user-joined", payload=ctx.payload, exclude=ctx.connection)
+    await room.send("user-joined", payload=ctx.payload)
 
 @reg.on_event("disconnected")
 async def on_disconnected(ctx: EventContext):
     room.remove(ctx.connection)
-    room.send("user-left", {}, exclude= ctx.connection)
+    await room.send("user-left", {}, exclude= ctx.connection)
 
 @reg.on_event("confirm")
 async def on_confirm(ctx: EventContext):
-    room.send("new", "new-connected", exclude= ctx.connection)
+    await room.send("new", "new-connected", exclude= ctx.connection)
 
 @reg.on_event("send")
 async def on_send(ctx: EventContext):
-    room.send("new-message", ctx.payload, exclude=ctx.connection)
+    await room.send("new-message", ctx.payload, exclude=ctx.connection)
 
 @app.websocket("/ws")
 async def websocket_controller(ws: WebSocket ):
