@@ -1,9 +1,12 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from zaptools.connectors import FastApiConnector
-from zaptools.tools import EventRegister, EventContext
-from zaptools.room import Room
-
+from zaptools import (
+    EventContext, 
+    EventRegister, 
+    Room,
+    MetaTag
+)
 
 app: FastAPI= FastAPI(title= "Chat Server")
 app.add_middleware(
@@ -19,13 +22,15 @@ room: Room = Room("chats")
 
 @reg.on_event("join-room")
 async def on_join_to_room(ctx: EventContext):
-    room.add(ctx.connection)
+    meta = MetaTag(name=ctx.payload["userName"])
+    room.add(ctx.connection, meta_tag= meta)
     await room.send("user-joined", payload=ctx.payload)
 
 @reg.on_event("disconnected")
 async def on_disconnected(ctx: EventContext):
+    meta: MetaTag = room.get_meta(ctx.connection)
     room.remove(ctx.connection)
-    await room.send("user-left", {}, exclude= ctx.connection)
+    await room.send("user-left", meta.name, exclude= ctx.connection)
 
 @reg.on_event("confirm")
 async def on_confirm(ctx: EventContext):
