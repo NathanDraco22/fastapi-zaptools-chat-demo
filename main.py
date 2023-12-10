@@ -42,5 +42,5 @@ async def on_send(ctx: EventContext):
 
 @app.websocket("/ws")
 async def websocket_controller(ws: WebSocket ):
-   processor = await FastApiConnector.plug(register= reg, websocket= ws)
-   await processor.start_event_stream()
+    connector = FastApiConnector(reg, ws)
+    await connector.start()
